@@ -1,5 +1,3 @@
-using System.Globalization;
-
 namespace Netcorext.Contracts.Protobufs;
 
 public static class ValueTypeExtension
@@ -7,23 +5,25 @@ public static class ValueTypeExtension
     public static ProtobufDecimal ToProtobufDecimal(this decimal value)
     {
         var decimalString = value.ToString("##################0.0#########").Split('.');
-        var precision = long.Parse(decimalString[0]);
-        var scale = int.Parse(decimalString[1]);
-        
+        var precision = Math.Abs(long.Parse(decimalString[0]));
+        var scale = Math.Abs(int.Parse(decimalString[1]));
+
         return new ProtobufDecimal
                {
                    Precision = precision,
-                   Scale = scale
+                   Scale = scale,
+                   Minus = value < 0
                };
     }
 
     public static decimal ToDecimal(this ProtobufDecimal value)
     {
-        var precision = value.Precision;
-        var scale = value.Scale;
-        var scaleLength = value.Scale.ToString().Length;
+        var precision = Math.Abs(value.Precision);
+        var scale = Math.Abs(value.Scale);
+        var scaleLength = scale.ToString().Length;
         var scaleFactor = (decimal)Math.Pow(10, scaleLength);
+        var absValue = precision + scale / scaleFactor;
 
-        return precision + scale / scaleFactor;
+        return value.Minus ? 0 - absValue : absValue;
     }
 }
