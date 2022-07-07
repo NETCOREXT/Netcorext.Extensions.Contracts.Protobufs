@@ -6,7 +6,7 @@ public static class ValueTypeExtension
 {
     public static ProtobufDecimal ToProtobufDecimal(this decimal value)
     {
-        var decimalString = value.ToString(CultureInfo.InvariantCulture).Split('.');
+        var decimalString = value.ToString("##################0.0#########").Split('.');
         var precision = long.Parse(decimalString[0]);
         var scale = int.Parse(decimalString[1]);
         
