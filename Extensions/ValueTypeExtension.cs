@@ -2,16 +2,17 @@ namespace Netcorext.Contracts.Protobufs;
 
 public static class ValueTypeExtension
 {
+    private static readonly int Fill = (int)Math.Pow(10, 8);
+    
     public static ProtobufDecimal ToProtobufDecimal(this decimal value)
     {
-        var decimalString = value.ToString("##################0.0#########").Split('.');
-        var precision = Math.Abs(long.Parse(decimalString[0]));
-        var scale = Math.Abs(int.Parse(decimalString[1]));
+        var precision = (long)Math.Truncate(value);
+        var scale = (int)((value - precision) * Fill);
 
         return new ProtobufDecimal
                {
-                   Precision = precision,
-                   Scale = scale,
+                   Precision = Math.Abs(precision),
+                   Scale = Math.Abs(scale),
                    Minus = value < 0
                };
     }
@@ -19,10 +20,8 @@ public static class ValueTypeExtension
     public static decimal ToDecimal(this ProtobufDecimal value)
     {
         var precision = Math.Abs(value.Precision);
-        var scale = Math.Abs(value.Scale);
-        var scaleLength = scale.ToString().Length;
-        var scaleFactor = (decimal)Math.Pow(10, scaleLength);
-        var absValue = precision + scale / scaleFactor;
+        var scale = (decimal)Math.Abs(value.Scale) / Fill;
+        var absValue = precision + scale;
 
         return value.Minus ? 0 - absValue : absValue;
     }
